@@ -1,11 +1,12 @@
 name: 'tests Windows'
 
 on:
-  push:
-    branches:
-      - 'master'
-  pull_request:
-
+  #push:
+  #  branches:
+  #    - 'master'
+  #pull_request:
+  workflow_dispatch:
+  
 jobs:
   mingw:
 
@@ -49,7 +50,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt -y update
-          sudo apt -y install build-essential
+          sudo apt -y install build-essential unzip wget python3-venv p7zip-full
           pip.exe install meson
 
       - name: Restore from cache and install vcpkg
@@ -60,12 +61,30 @@ jobs:
           vcpkgArguments: pthreads opengl-registry ffmpeg[ffmpeg,ffprobe] sdl2
           cleanAfterBuild: false
 
-      - name: vcpkg integrate install
+      - name: Setup tmate
+        if: always()
         run: |
-          cd vcpkg && ./vcpkg.exe integrate install
+          sudo apt -y update
+          #Install tmate
+          sudo apt-get install -y tmate openssh-client
+          # Generate ssh key if needed
+          [ -e ~/.ssh/id_rsa ] || ssh-keygen -t rsa -f ~/.ssh/id_rsa -q -N ""
+          # Run deamonized tmate
+          echo Running tmate...
+          tmate -S /tmp/tmate.sock new-session -d
+          tmate -S /tmp/tmate.sock wait tmate-ready
+          # Wait for connection
+          while [ -S /tmp/tmate.sock ]; do
+            # Print connection info
+            tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}'
+            sleep 10
+          done
 
       - name: Build
         run: |
-          make -j$(($(nproc)+1)) TARGET_OS=Windows \
-          VCPKG_DIR='D:\\a\\gopro-lib-node.gl\\gopro-lib-node.gl\\vcpkg' \
-          VCVARS64='"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"'
+          export VCVARS64='"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"'
+          bash build_scripts/windows/set_vcvars.sh
+          export VCPKG_DIR='D:\a\gopro-lib-node.gl\gopro-lib-node.gl\vcpkg'
+          source build_scripts/windows/setenv.sh
+          bash build_scripts/windows/patch_pkg_config_files.sh
+          make
