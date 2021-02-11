@@ -42,6 +42,18 @@
 #include "program_vk.h"
 #include "pipeline_vk.h"
 
+static int get_swapchain_ngli_format(VkFormat format)
+{
+    switch (format) {
+    case VK_FORMAT_R8G8B8A8_UNORM:
+        return NGLI_FORMAT_R8G8B8A8_UNORM;
+    case VK_FORMAT_B8G8R8A8_UNORM:
+        return NGLI_FORMAT_B8G8R8A8_UNORM;
+    default:
+        ngli_assert(0);
+    }
+}
+
 static VkResult select_swapchain_surface_format(struct vkcontext *vk, VkSurfaceFormatKHR *format)
 {
     LOG(INFO, "available surface formats:");
@@ -624,9 +636,10 @@ static int vk_init(struct gctx *s)
     } else {
         s_priv->default_rendertarget_desc.samples = config->samples;
         s_priv->default_rendertarget_desc.nb_colors = 1;
-        s_priv->default_rendertarget_desc.colors[0].format = NGLI_FORMAT_B8G8R8A8_UNORM;
+        s_priv->default_rendertarget_desc.colors[0].format = get_swapchain_ngli_format(s_priv->surface_format.format);
         s_priv->default_rendertarget_desc.colors[0].resolve = config->samples > 0 ? 1 : 0;
         s_priv->default_rendertarget_desc.depth_stencil.format = vk->preferred_depth_stencil_format;
+        s_priv->default_rendertarget_desc.depth_stencil.resolve = 0;
     }
 
     return 0;
