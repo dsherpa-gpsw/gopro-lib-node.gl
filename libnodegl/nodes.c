@@ -595,14 +595,14 @@ int ngl_node_param_add(struct ngl_node *node, const char *key,
         return NGL_ERROR_INVALID_USAGE;
     }
 
-    ret = ngli_params_add(base_ptr, par, nb_elems, elems);
+    if (node->ctx && par->live_add_func)
+        ret = par->live_add_func(node, nb_elems, elems);
+    else
+        ret = ngli_params_add(base_ptr, par, nb_elems, elems);
     if (ret < 0) {
         LOG(ERROR, "unable to add elements to %s.%s", node->label, key);
         return ret;
     }
-
-    if (node->ctx && par->update_func)
-        ret = par->update_func(node);
 
     return ret;
 }
@@ -623,15 +623,15 @@ int ngl_node_param_set(struct ngl_node *node, const char *key, ...)
     }
 
     va_start(ap, key);
-    ret = ngli_params_set(base_ptr, par, &ap);
+    if (node->ctx && par->live_set_func)
+        ret = par->live_set_func(node, ap);
+    else
+        ret = ngli_params_set(base_ptr, par, &ap);
     va_end(ap);
     if (ret < 0) {
         LOG(ERROR, "unable to set %s.%s", node->label, key);
         return ret;
     }
-
-    if (node->ctx && par->update_func)
-        ret = par->update_func(node);
 
     return ret;
 }

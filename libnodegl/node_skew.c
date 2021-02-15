@@ -76,13 +76,15 @@ static int skew_init(struct ngl_node *node)
     return 0;
 }
 
-static int update_angles(struct ngl_node *node)
+static int update_angles(struct ngl_node *node, va_list ap)
 {
     struct skew_priv *s = node->priv_data;
     if (s->anim) {
         LOG(ERROR, "updating angles while the animation is set is unsupported");
         return NGL_ERROR_INVALID_USAGE;
     }
+    float *angles = va_arg(ap, float *);
+    memcpy(s->angles, angles, sizeof(s->angles));
     update_trf_matrix(node, s->angles);
     return 0;
 }
@@ -110,7 +112,7 @@ static const struct node_param skew_params[] = {
                .desc=NGLI_DOCSTRING("scene to skew")},
     {"angles", PARAM_TYPE_VEC3,  OFFSET(angles),
                .flags=PARAM_FLAG_ALLOW_LIVE_CHANGE,
-               .update_func=update_angles,
+               .live_set_func=update_angles,
                .desc=NGLI_DOCSTRING("skewing angles, only components forming a plane opposite to `axis` should be set")},
     {"axis",   PARAM_TYPE_VEC3, OFFSET(axis), {.vec={1.0, 0.0, 0.0}},
                .desc=NGLI_DOCSTRING("skew axis")},

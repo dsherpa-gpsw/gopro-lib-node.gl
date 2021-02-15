@@ -73,13 +73,15 @@ static int rotate_init(struct ngl_node *node)
     return 0;
 }
 
-static int update_angle(struct ngl_node *node)
+static int update_angle(struct ngl_node *node, va_list ap)
 {
     struct rotate_priv *s = node->priv_data;
     if (s->anim) {
         LOG(ERROR, "updating angle while the animation is set is unsupported");
         return NGL_ERROR_INVALID_USAGE;
     }
+    double angle = va_arg(ap, double);
+    s->angle = angle;
     update_trf_matrix(node, s->angle);
     return 0;
 }
@@ -107,7 +109,7 @@ static const struct node_param rotate_params[] = {
                .desc=NGLI_DOCSTRING("scene to rotate")},
     {"angle",  PARAM_TYPE_DBL,  OFFSET(angle),
                .flags=PARAM_FLAG_ALLOW_LIVE_CHANGE,
-               .update_func=update_angle,
+               .live_set_func=update_angle,
                .desc=NGLI_DOCSTRING("rotation angle in degrees")},
     {"axis",   PARAM_TYPE_VEC3, OFFSET(axis),   {.vec={0.0, 0.0, 1.0}},
                .desc=NGLI_DOCSTRING("rotation axis")},
