@@ -337,6 +337,183 @@ static void node_hmap_free(void *user_arg, void *data)
     ngl_node_unrefp(&node);
 }
 
+int ngli_params_set_value(struct param_value *value, const struct node_param *par, va_list *ap)
+{
+    value->type = par->type;
+
+    switch (par->type) {
+        case PARAM_TYPE_SELECT: {
+            int v;
+            const char *s = va_arg(*ap, const char *);
+            int ret = ngli_params_get_select_val(par->choices->consts, s, &v);
+            if (ret < 0) {
+                LOG(ERROR, "unrecognized constant \"%s\" for option %s", s, par->key);
+                return ret;
+            }
+            LOG(VERBOSE, "set %s to %s (%d)", par->key, s, v);
+            value->i = v;
+            break;
+        }
+        case PARAM_TYPE_FLAGS: {
+            int v;
+            const char *s = va_arg(*ap, const char *);
+            int ret = ngli_params_get_flags_val(par->choices->consts, s, &v);
+            if (ret < 0) {
+                LOG(ERROR, "unrecognized flags \"%s\" for option %s", s, par->key);
+                return ret;
+            }
+            LOG(VERBOSE, "set %s to %s (%d)", par->key, s, v);
+            value->i = v;
+            break;
+        }
+        case PARAM_TYPE_BOOL:
+        case PARAM_TYPE_INT: {
+            int v = va_arg(*ap, int);
+            if (par->type == PARAM_TYPE_BOOL && v != -1)
+                v = !!v;
+            LOG(VERBOSE, "set %s to %d", par->key, v);
+            value->i = v;
+            break;
+        }
+        case PARAM_TYPE_UINT: {
+            unsigned v = va_arg(*ap, unsigned);
+            LOG(VERBOSE, "set %s to %u", par->key, v);
+            value->u = v;
+            break;
+        }
+        case PARAM_TYPE_I64: {
+            int64_t v = va_arg(*ap, int64_t);
+            LOG(VERBOSE, "set %s to %"PRId64, par->key, v);
+            value->i64 = v;
+            break;
+        }
+        case PARAM_TYPE_DBL: {
+            double v = va_arg(*ap, double);
+            LOG(VERBOSE, "set %s to %g", par->key, v);
+            value->dbl = v;
+            break;
+        }
+        case PARAM_TYPE_STR: {
+            const char *arg_str = va_arg(*ap, const char *);
+            value->str = arg_str;
+            LOG(VERBOSE, "set %s to \"%s\"", par->key, arg_str ? arg_str : "NULL");
+            break;
+        }
+        case PARAM_TYPE_DATA: {
+            int size = va_arg(*ap, int);
+            void *data = va_arg(*ap, void *);
+            LOG(VERBOSE, "set %s to %p (of size %d)", par->key, data, size);
+            value->data = data;
+            value->data_size = size;
+        }
+        case PARAM_TYPE_IVEC2: {
+            const int *iv = va_arg(*ap, const int *);
+            LOG(VERBOSE, "set %s to (%d,%d)", par->key, NGLI_ARG_VEC2(iv));
+            value->data = iv;
+            value->data_size = 2 * sizeof(*iv);
+            break;
+        }
+        case PARAM_TYPE_IVEC3: {
+            const int *iv = va_arg(*ap, const int *);
+            LOG(VERBOSE, "set %s to (%d,%d,%d)", par->key, NGLI_ARG_VEC3(iv));
+            value->data = iv;
+            value->data_size = 3 * sizeof(*iv);
+            break;
+        }
+        case PARAM_TYPE_IVEC4: {
+            const int *iv = va_arg(*ap, const int *);
+            LOG(VERBOSE, "set %s to (%d,%d,%d,%d)", par->key, NGLI_ARG_VEC4(iv));
+            value->data = iv;
+            value->data_size = 4 * sizeof(*iv);
+            break;
+        }
+        case PARAM_TYPE_UIVEC2: {
+            const unsigned *uv = va_arg(*ap, const unsigned *);
+            LOG(VERBOSE, "set %s to (%u,%u)", par->key, NGLI_ARG_VEC2(uv));
+            value->data = uv;
+            value->data_size = 2 * sizeof(*uv);
+            break;
+        }
+        case PARAM_TYPE_UIVEC3: {
+            const unsigned *uv = va_arg(*ap, const unsigned *);
+            LOG(VERBOSE, "set %s to (%u,%u,%u)", par->key, NGLI_ARG_VEC3(uv));
+            value->data = uv;
+            value->data_size = 3 * sizeof(*uv);
+            break;
+        }
+        case PARAM_TYPE_UIVEC4: {
+            const unsigned *uv = va_arg(*ap, const unsigned *);
+            LOG(VERBOSE, "set %s to (%u,%u,%u,%u)", par->key, NGLI_ARG_VEC4(uv));
+            value->data = uv;
+            value->data_size = 4 * sizeof(*uv);
+            break;
+        }
+        case PARAM_TYPE_VEC2: {
+            const float *v = va_arg(*ap, const float *);
+            LOG(VERBOSE, "set %s to (%g,%g)", par->key, NGLI_ARG_VEC2(v));
+            value->data = v;
+            value->data_size = 2 * sizeof(*v);
+            break;
+        }
+        case PARAM_TYPE_VEC3: {
+            const float *v = va_arg(*ap, const float *);
+            LOG(VERBOSE, "set %s to (%g,%g,%g)", par->key, NGLI_ARG_VEC3(v));
+            value->data = v;
+            value->data_size = 3 * sizeof(*v);
+            break;
+        }
+        case PARAM_TYPE_VEC4: {
+            const float *v = va_arg(*ap, const float *);
+            LOG(VERBOSE, "set %s to (%g,%g,%g,%g)", par->key, NGLI_ARG_VEC4(v));
+            value->data = v;
+            value->data_size = 4 * sizeof(*v);
+            break;
+        }
+        case PARAM_TYPE_MAT4: {
+            const float *v = va_arg(*ap, const float *);
+            LOG(VERBOSE,
+                "set %s to (%g,%g,%g,%g %g,%g,%g,%g %g,%g,%g,%g %g,%g,%g,%g)",
+                par->key, NGLI_ARG_MAT4(v));
+            value->data = v;
+            value->data_size = 4 * 4 * sizeof(*v);
+            break;
+        }
+        case PARAM_TYPE_NODE: {
+            struct ngl_node *node = va_arg(*ap, struct ngl_node *);
+            if (!allowed_node(node, par->node_types)) {
+                LOG(ERROR, "%s (%s) is not an allowed type for %s",
+                    node->label, node->class->name, par->key);
+                return NGL_ERROR_INVALID_ARG;
+            }
+            LOG(VERBOSE, "set %s to %s", par->key, node->label);
+            value->data = node;
+            break;
+        }
+        case PARAM_TYPE_NODEDICT: {
+            const char *name = va_arg(*ap, const char *);
+            struct ngl_node *node = va_arg(*ap, struct ngl_node *);
+            if (node && !allowed_node(node, par->node_types)) {
+                LOG(ERROR, "%s (%s) is not an allowed type for %s",
+                    node->label, node->class->name, par->key);
+                return NGL_ERROR_INVALID_ARG;
+            }
+            LOG(VERBOSE, "set %s to (%s,%p)", par->key, name, node);
+            value->key = name;
+            value->value = node;
+            break;
+        }
+        case PARAM_TYPE_RATIONAL: {
+            const int num = va_arg(*ap, int);
+            const int den = va_arg(*ap, int);
+            LOG(VERBOSE, "set %s to %d/%d", par->key, num, den);
+            value->r[0] = num;
+            value->r[1] = den;
+            break;
+        }
+    }
+    return 0;
+}
+
 int ngli_params_set(uint8_t *base_ptr, const struct node_param *par, va_list *ap)
 {
     uint8_t *dstp = base_ptr + par->offset;

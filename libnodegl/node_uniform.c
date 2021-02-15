@@ -44,38 +44,52 @@ static int set_live_changed(struct ngl_node *node)
     return 0;
 }
 
-#define DECLARE_UPDATE_FUNC(name, src)                        \
-static int uniform##name##_update_func(struct ngl_node *node) \
-{                                                             \
-    int ret = set_live_changed(node);                         \
-    if (ret < 0)                                              \
-        return ret;                                           \
-    struct variable_priv *s = node->priv_data;                \
-    memcpy(s->data, src, s->data_size);                       \
-    return 0;                                                 \
-}                                                             \
+#define DECLARE_UPDATE_FUNC(name, src)                                                              \
+static int uniform##name##_update_func(struct ngl_node *node, const struct param_value *value) \
+{                                                                                                   \
+    int ret = set_live_changed(node);                                                               \
+    if (ret < 0)                                                                                    \
+        return ret;                                                                                 \
+    struct variable_priv *s = node->priv_data;                                                      \
+    memcpy(src, value->data, s->data_size);                                                         \
+    memcpy(s->data, src, s->data_size);                                                             \
+    return 0;                                                                                       \
+}                                                                                                   \
 
 DECLARE_UPDATE_FUNC(ivec,  s->opt.ivec)
 DECLARE_UPDATE_FUNC(uivec, s->opt.uvec)
 DECLARE_UPDATE_FUNC(vec,   s->opt.vec)
 DECLARE_UPDATE_FUNC(mat4,  s->opt.mat)
 
-static int uniformfloat_update_func(struct ngl_node *node)
+static int uniformint_update_func(struct ngl_node *node, const struct param_value *value)
 {
     int ret = set_live_changed(node);
     if (ret < 0)
         return ret;
     struct variable_priv *s = node->priv_data;
+    s->opt.ivec[0] = value->i;
+    s->ivector[0] = s->opt.ivec[0];
+    return 0;
+}
+
+static int uniformfloat_update_func(struct ngl_node *node, const struct param_value *value)
+{
+    int ret = set_live_changed(node);
+    if (ret < 0)
+        return ret;
+    struct variable_priv *s = node->priv_data;
+    s->opt.dbl = value->dbl;
     s->scalar = s->opt.dbl; // double -> float
     return 0;
 }
 
-static int uniformquat_update_func(struct ngl_node *node)
+static int uniformquat_update_func(struct ngl_node *node, const struct param_value *value)
 {
     int ret = set_live_changed(node);
     if (ret < 0)
         return ret;
     struct variable_priv *s = node->priv_data;
+    memcpy(s->opt.vec, value->data, s->data_size);
     memcpy(s->vector, s->opt.vec, s->data_size);
     if (s->as_mat4)
         ngli_mat4_rotate_from_quat(s->matrix, s->vector);
@@ -88,17 +102,17 @@ static int uniformquat_update_func(struct ngl_node *node)
 static const struct node_param uniform##type##_params[] = {             \
     {"value",  ptype, OFFSET(dst),                                      \
                .flags=PARAM_FLAG_ALLOW_LIVE_CHANGE,                     \
-               .update_func=upd_fn,                                     \
+               .live_set_func=upd_fn,                                   \
                .desc=NGLI_DOCSTRING("value exposed to the shader")},    \
     {NULL}                                                              \
 }
 
-DECLARE_PARAMS(bool,   PARAM_TYPE_BOOL,   opt.ivec, uniformivec_update_func);
+DECLARE_PARAMS(bool,   PARAM_TYPE_BOOL,   opt.ivec, uniformint_update_func);
 DECLARE_PARAMS(float,  PARAM_TYPE_DBL,    opt.dbl,  uniformfloat_update_func);
 DECLARE_PARAMS(vec2,   PARAM_TYPE_VEC2,   opt.vec,  uniformvec_update_func);
 DECLARE_PARAMS(vec3,   PARAM_TYPE_VEC3,   opt.vec,  uniformvec_update_func);
 DECLARE_PARAMS(vec4,   PARAM_TYPE_VEC4,   opt.vec,  uniformvec_update_func);
-DECLARE_PARAMS(int,    PARAM_TYPE_INT,    opt.ivec, uniformivec_update_func);
+DECLARE_PARAMS(int,    PARAM_TYPE_INT,    opt.ivec, uniformint_update_func);
 DECLARE_PARAMS(ivec2,  PARAM_TYPE_IVEC2,  opt.ivec, uniformivec_update_func);
 DECLARE_PARAMS(ivec3,  PARAM_TYPE_IVEC3,  opt.ivec, uniformivec_update_func);
 DECLARE_PARAMS(ivec4,  PARAM_TYPE_IVEC4,  opt.ivec, uniformivec_update_func);
@@ -110,7 +124,7 @@ DECLARE_PARAMS(uivec4, PARAM_TYPE_UIVEC4, opt.uvec, uniformuivec_update_func);
 static const struct node_param uniformquat_params[] = {
     {"value",  PARAM_TYPE_VEC4, OFFSET(opt.vec), {.vec=NGLI_QUAT_IDENTITY},
                .flags=PARAM_FLAG_ALLOW_LIVE_CHANGE,
-               .update_func=uniformquat_update_func,
+               .live_set_func=uniformquat_update_func,
                .desc=NGLI_DOCSTRING("value exposed to the shader")},
     {"as_mat4", PARAM_TYPE_BOOL, OFFSET(as_mat4), {.i64=0},
                 .desc=NGLI_DOCSTRING("exposed as a 4x4 rotation matrix in the program")},
@@ -120,7 +134,7 @@ static const struct node_param uniformquat_params[] = {
 static const struct node_param uniformmat4_params[] = {
     {"value",     PARAM_TYPE_MAT4, OFFSET(opt.mat), {.mat=NGLI_MAT4_IDENTITY},
                   .flags=PARAM_FLAG_ALLOW_LIVE_CHANGE,
-                  .update_func=uniformmat4_update_func,
+                  .live_set_func=uniformmat4_update_func,
                   .desc=NGLI_DOCSTRING("value exposed to the shader")},
     {"transform", PARAM_TYPE_NODE, OFFSET(transform), .node_types=TRANSFORM_TYPES_LIST,
                   .desc=NGLI_DOCSTRING("`value` transformation chain")},
