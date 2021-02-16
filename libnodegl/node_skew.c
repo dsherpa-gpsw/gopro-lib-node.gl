@@ -83,7 +83,7 @@ static int update_angles(struct ngl_node *node, const struct param_value *value)
         LOG(ERROR, "updating angles while the animation is set is unsupported");
         return NGL_ERROR_INVALID_USAGE;
     }
-    memcpy(s->angles, value->data, sizeof(s->angles));
+    memcpy(s->angles, value->data.ptr, sizeof(s->angles));
     update_trf_matrix(node, s->angles);
     return 0;
 }

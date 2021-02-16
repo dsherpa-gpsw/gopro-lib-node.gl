@@ -72,7 +72,7 @@ static int update_quat(struct ngl_node *node, const struct param_value *value)
         LOG(ERROR, "updating quat while the animation is set is unsupported");
         return NGL_ERROR_INVALID_USAGE;
     }
-    memcpy(s->quat, value->data, sizeof(s->quat));
+    memcpy(s->quat, value->data.ptr, sizeof(s->quat));
     update_trf_matrix(node, s->quat);
     return 0;
 }

@@ -80,13 +80,13 @@ struct param_value {
         double dbl;
         const char *str;
         struct {
-            const void *data;
-            int data_size;
-        };
+            const void *ptr;
+            int size;
+        } data;
         struct {
             const char *key;
             struct ngl_node *value;
-        };
+        } dict;
         int r[2];
     };
 };

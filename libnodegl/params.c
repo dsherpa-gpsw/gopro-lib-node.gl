@@ -403,70 +403,70 @@ int ngli_params_set_value(struct param_value *value, const struct node_param *pa
             int size = va_arg(*ap, int);
             void *data = va_arg(*ap, void *);
             LOG(VERBOSE, "set %s to %p (of size %d)", par->key, data, size);
-            value->data = data;
-            value->data_size = size;
+            value->data.ptr = data;
+            value->data.size = size;
         }
         case PARAM_TYPE_IVEC2: {
             const int *iv = va_arg(*ap, const int *);
             LOG(VERBOSE, "set %s to (%d,%d)", par->key, NGLI_ARG_VEC2(iv));
-            value->data = iv;
-            value->data_size = 2 * sizeof(*iv);
+            value->data.ptr = iv;
+            value->data.size = 2 * sizeof(*iv);
             break;
         }
         case PARAM_TYPE_IVEC3: {
             const int *iv = va_arg(*ap, const int *);
             LOG(VERBOSE, "set %s to (%d,%d,%d)", par->key, NGLI_ARG_VEC3(iv));
-            value->data = iv;
-            value->data_size = 3 * sizeof(*iv);
+            value->data.ptr = iv;
+            value->data.size = 3 * sizeof(*iv);
             break;
         }
         case PARAM_TYPE_IVEC4: {
             const int *iv = va_arg(*ap, const int *);
             LOG(VERBOSE, "set %s to (%d,%d,%d,%d)", par->key, NGLI_ARG_VEC4(iv));
-            value->data = iv;
-            value->data_size = 4 * sizeof(*iv);
+            value->data.ptr = iv;
+            value->data.size = 4 * sizeof(*iv);
             break;
         }
         case PARAM_TYPE_UIVEC2: {
             const unsigned *uv = va_arg(*ap, const unsigned *);
             LOG(VERBOSE, "set %s to (%u,%u)", par->key, NGLI_ARG_VEC2(uv));
-            value->data = uv;
-            value->data_size = 2 * sizeof(*uv);
+            value->data.ptr = uv;
+            value->data.size = 2 * sizeof(*uv);
             break;
         }
         case PARAM_TYPE_UIVEC3: {
             const unsigned *uv = va_arg(*ap, const unsigned *);
             LOG(VERBOSE, "set %s to (%u,%u,%u)", par->key, NGLI_ARG_VEC3(uv));
-            value->data = uv;
-            value->data_size = 3 * sizeof(*uv);
+            value->data.ptr = uv;
+            value->data.size = 3 * sizeof(*uv);
             break;
         }
         case PARAM_TYPE_UIVEC4: {
             const unsigned *uv = va_arg(*ap, const unsigned *);
             LOG(VERBOSE, "set %s to (%u,%u,%u,%u)", par->key, NGLI_ARG_VEC4(uv));
-            value->data = uv;
-            value->data_size = 4 * sizeof(*uv);
+            value->data.ptr = uv;
+            value->data.size = 4 * sizeof(*uv);
             break;
         }
         case PARAM_TYPE_VEC2: {
             const float *v = va_arg(*ap, const float *);
             LOG(VERBOSE, "set %s to (%g,%g)", par->key, NGLI_ARG_VEC2(v));
-            value->data = v;
-            value->data_size = 2 * sizeof(*v);
+            value->data.ptr = v;
+            value->data.size = 2 * sizeof(*v);
             break;
         }
         case PARAM_TYPE_VEC3: {
             const float *v = va_arg(*ap, const float *);
             LOG(VERBOSE, "set %s to (%g,%g,%g)", par->key, NGLI_ARG_VEC3(v));
-            value->data = v;
-            value->data_size = 3 * sizeof(*v);
+            value->data.ptr = v;
+            value->data.size = 3 * sizeof(*v);
             break;
         }
         case PARAM_TYPE_VEC4: {
             const float *v = va_arg(*ap, const float *);
             LOG(VERBOSE, "set %s to (%g,%g,%g,%g)", par->key, NGLI_ARG_VEC4(v));
-            value->data = v;
-            value->data_size = 4 * sizeof(*v);
+            value->data.ptr = v;
+            value->data.size = 4 * sizeof(*v);
             break;
         }
         case PARAM_TYPE_MAT4: {
@@ -474,8 +474,8 @@ int ngli_params_set_value(struct param_value *value, const struct node_param *pa
             LOG(VERBOSE,
                 "set %s to (%g,%g,%g,%g %g,%g,%g,%g %g,%g,%g,%g %g,%g,%g,%g)",
                 par->key, NGLI_ARG_MAT4(v));
-            value->data = v;
-            value->data_size = 4 * 4 * sizeof(*v);
+            value->data.ptr = v;
+            value->data.size = 4 * 4 * sizeof(*v);
             break;
         }
         case PARAM_TYPE_NODE: {
@@ -486,7 +486,7 @@ int ngli_params_set_value(struct param_value *value, const struct node_param *pa
                 return NGL_ERROR_INVALID_ARG;
             }
             LOG(VERBOSE, "set %s to %s", par->key, node->label);
-            value->data = node;
+            value->data.ptr = node;
             break;
         }
         case PARAM_TYPE_NODEDICT: {
@@ -498,8 +498,8 @@ int ngli_params_set_value(struct param_value *value, const struct node_param *pa
                 return NGL_ERROR_INVALID_ARG;
             }
             LOG(VERBOSE, "set %s to (%s,%p)", par->key, name, node);
-            value->key = name;
-            value->value = node;
+            value->dict.key = name;
+            value->dict.value = node;
             break;
         }
         case PARAM_TYPE_RATIONAL: {

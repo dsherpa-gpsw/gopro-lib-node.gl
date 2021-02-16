@@ -45,13 +45,13 @@ static int set_live_changed(struct ngl_node *node)
 }
 
 #define DECLARE_UPDATE_FUNC(name, src)                                                              \
-static int uniform##name##_update_func(struct ngl_node *node, const struct param_value *value) \
+static int uniform##name##_update_func(struct ngl_node *node, const struct param_value *value)      \
 {                                                                                                   \
     int ret = set_live_changed(node);                                                               \
     if (ret < 0)                                                                                    \
         return ret;                                                                                 \
     struct variable_priv *s = node->priv_data;                                                      \
-    memcpy(src, value->data, s->data_size);                                                         \
+    memcpy(src, value->data.ptr, s->data_size);                                                     \
     memcpy(s->data, src, s->data_size);                                                             \
     return 0;                                                                                       \
 }                                                                                                   \
@@ -89,7 +89,7 @@ static int uniformquat_update_func(struct ngl_node *node, const struct param_val
     if (ret < 0)
         return ret;
     struct variable_priv *s = node->priv_data;
-    memcpy(s->opt.vec, value->data, s->data_size);
+    memcpy(s->opt.vec, value->data.ptr, s->data_size);
     memcpy(s->vector, s->opt.vec, s->data_size);
     if (s->as_mat4)
         ngli_mat4_rotate_from_quat(s->matrix, s->vector);

@@ -71,7 +71,7 @@ static int update_factors(struct ngl_node *node, const struct param_value *value
         LOG(ERROR, "updating factors while the animation is set is unsupported");
         return NGL_ERROR_INVALID_USAGE;
     }
-    const float *factors = value->data;
+    const float *factors = value->data.ptr;
     memcpy(s->factors, factors, sizeof(s->factors));
     update_trf_matrix(node, s->factors);
     return 0;

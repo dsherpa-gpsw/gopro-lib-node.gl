@@ -48,7 +48,7 @@ static int update_vector(struct ngl_node *node, const struct param_value *value)
         LOG(ERROR, "updating vector while the animation is set is unsupported");
         return NGL_ERROR_INVALID_USAGE;
     }
-    memcpy(s->vector, value->data, sizeof(s->vector));
+    memcpy(s->vector, value->data.ptr, sizeof(s->vector));
     update_trf_matrix(node, s->vector);
     return 0;
 }
