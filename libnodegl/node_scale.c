@@ -101,7 +101,7 @@ static const struct node_param scale_params[] = {
     {"factors", PARAM_TYPE_VEC3, OFFSET(factors),
                 {.vec={1.0, 1.0, 1.0}},
                 .flags=PARAM_FLAG_ALLOW_LIVE_CHANGE,
-                .live_set_func=update_factors,
+                .set_func=update_factors,
                 .desc=NGLI_DOCSTRING("scaling factors (how much to scale on each axis)")},
     {"anchor",  PARAM_TYPE_VEC3, OFFSET(anchor),
                 .desc=NGLI_DOCSTRING("vector to the center point of the scale")},

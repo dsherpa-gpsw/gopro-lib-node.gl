@@ -111,7 +111,7 @@ static const struct node_param skew_params[] = {
                .desc=NGLI_DOCSTRING("scene to skew")},
     {"angles", PARAM_TYPE_VEC3,  OFFSET(angles),
                .flags=PARAM_FLAG_ALLOW_LIVE_CHANGE,
-               .live_set_func=update_angles,
+               .set_func=update_angles,
                .desc=NGLI_DOCSTRING("skewing angles, only components forming a plane opposite to `axis` should be set")},
     {"axis",   PARAM_TYPE_VEC3, OFFSET(axis), {.vec={1.0, 0.0, 0.0}},
                .desc=NGLI_DOCSTRING("skew axis")},

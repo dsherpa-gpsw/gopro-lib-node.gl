@@ -108,7 +108,7 @@ static const struct node_param rotate_params[] = {
                .desc=NGLI_DOCSTRING("scene to rotate")},
     {"angle",  PARAM_TYPE_DBL,  OFFSET(angle),
                .flags=PARAM_FLAG_ALLOW_LIVE_CHANGE,
-               .live_set_func=update_angle,
+               .set_func=update_angle,
                .desc=NGLI_DOCSTRING("rotation angle in degrees")},
     {"axis",   PARAM_TYPE_VEC3, OFFSET(axis),   {.vec={0.0, 0.0, 1.0}},
                .desc=NGLI_DOCSTRING("rotation axis")},

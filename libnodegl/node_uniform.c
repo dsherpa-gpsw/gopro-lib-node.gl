@@ -102,7 +102,7 @@ static int uniformquat_update_func(struct ngl_node *node, const struct param_val
 static const struct node_param uniform##type##_params[] = {             \
     {"value",  ptype, OFFSET(dst),                                      \
                .flags=PARAM_FLAG_ALLOW_LIVE_CHANGE,                     \
-               .live_set_func=upd_fn,                                   \
+               .set_func=upd_fn,                                   \
                .desc=NGLI_DOCSTRING("value exposed to the shader")},    \
     {NULL}                                                              \
 }
@@ -124,7 +124,7 @@ DECLARE_PARAMS(uivec4, PARAM_TYPE_UIVEC4, opt.uvec, uniformuivec_update_func);
 static const struct node_param uniformquat_params[] = {
     {"value",  PARAM_TYPE_VEC4, OFFSET(opt.vec), {.vec=NGLI_QUAT_IDENTITY},
                .flags=PARAM_FLAG_ALLOW_LIVE_CHANGE,
-               .live_set_func=uniformquat_update_func,
+               .set_func=uniformquat_update_func,
                .desc=NGLI_DOCSTRING("value exposed to the shader")},
     {"as_mat4", PARAM_TYPE_BOOL, OFFSET(as_mat4), {.i64=0},
                 .desc=NGLI_DOCSTRING("exposed as a 4x4 rotation matrix in the program")},
@@ -134,7 +134,7 @@ static const struct node_param uniformquat_params[] = {
 static const struct node_param uniformmat4_params[] = {
     {"value",     PARAM_TYPE_MAT4, OFFSET(opt.mat), {.mat=NGLI_MAT4_IDENTITY},
                   .flags=PARAM_FLAG_ALLOW_LIVE_CHANGE,
-                  .live_set_func=uniformmat4_update_func,
+                  .set_func=uniformmat4_update_func,
                   .desc=NGLI_DOCSTRING("value exposed to the shader")},
     {"transform", PARAM_TYPE_NODE, OFFSET(transform), .node_types=TRANSFORM_TYPES_LIST,
                   .desc=NGLI_DOCSTRING("`value` transformation chain")},

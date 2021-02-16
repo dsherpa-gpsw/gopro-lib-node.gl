@@ -116,8 +116,8 @@ struct node_param {
     const int *node_types;
     const char *desc;
     const struct param_choices *choices;
-    int (*live_add_func)(struct ngl_node *node, int nb_elems, void *elems);
-    int (*live_set_func)(struct ngl_node *node, const struct param_value *value);
+    int (*add_func)(struct ngl_node *node, int nb_elems, void *elems);
+    int (*set_func)(struct ngl_node *node, const struct param_value *value);
 };
 
 int ngli_params_get_select_val(const struct param_const *consts, const char *s, int *dst);

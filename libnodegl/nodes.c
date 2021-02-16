@@ -595,8 +595,8 @@ int ngl_node_param_add(struct ngl_node *node, const char *key,
         return NGL_ERROR_INVALID_USAGE;
     }
 
-    if (node->ctx && par->live_add_func)
-        ret = par->live_add_func(node, nb_elems, elems);
+    if (node->ctx && par->add_func)
+        ret = par->add_func(node, nb_elems, elems);
     else
         ret = ngli_params_add(base_ptr, par, nb_elems, elems);
     if (ret < 0) {
@@ -623,14 +623,14 @@ int ngl_node_param_set(struct ngl_node *node, const char *key, ...)
     }
 
     va_start(ap, key);
-    if (node->ctx && par->live_set_func) {
+    if (node->ctx && par->set_func) {
         struct param_value value = {0};
         ret = ngli_params_set_value(&value, par, &ap);
         if (ret < 0) {
             va_end(ap);
             return ret;
         }
-        ret = par->live_set_func(node, &value);
+        ret = par->set_func(node, &value);
     } else {
         ret = ngli_params_set(base_ptr, par, &ap);
     }

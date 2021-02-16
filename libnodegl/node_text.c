@@ -140,7 +140,7 @@ static int set_live_aspect_ratio(struct ngl_node *node, const struct param_value
 static const struct node_param text_params[] = {
     {"text",         PARAM_TYPE_STR, OFFSET(text), {.str=""},
                      .flags=PARAM_FLAG_ALLOW_LIVE_CHANGE | PARAM_FLAG_NON_NULL,
-                     .live_set_func=set_live_changed,
+                     .set_func=set_live_changed,
                      .desc=NGLI_DOCSTRING("text string to rasterize")},
     {"fg_color",     PARAM_TYPE_VEC4, OFFSET(fg_color), {.vec={1.0, 1.0, 1.0, 1.0}},
                      .flags=PARAM_FLAG_ALLOW_LIVE_CHANGE,
@@ -166,7 +166,7 @@ static const struct node_param text_params[] = {
                      .desc=NGLI_DOCSTRING("horizontal alignment of the text in the box")},
     {"aspect_ratio", PARAM_TYPE_RATIONAL, OFFSET(aspect_ratio),
                      .flags=PARAM_FLAG_ALLOW_LIVE_CHANGE,
-                     .live_set_func=set_live_aspect_ratio,
+                     .set_func=set_live_aspect_ratio,
                      .desc=NGLI_DOCSTRING("box aspect ratio")},
     {NULL}
 };
